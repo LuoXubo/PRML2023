@@ -12,6 +12,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from scipy.io import loadmat
 import numpy as np
+import matplotlib.pyplot as plt
+import _pickle as pickle
 
 # 加载手写数字数据集
 dataset = loadmat('mnist_all.mat')
@@ -35,11 +37,44 @@ base_classifier = DecisionTreeClassifier(max_depth=1)
 # 设置Boosting的迭代次数
 n_estimators = 50
 
+# 存储每次迭代后的训练集和测试集准确率
+train_accuracies = []
+test_accuracies = []
+
 # 创建AdaBoost分类器
 adaboost_classifier = AdaBoostClassifier(base_classifier, n_estimators=n_estimators, random_state=42)
+is_eval = False
 
-# 训练模型
-adaboost_classifier.fit(X_train, y_train)
+if not is_eval:
+    # 训练模型
+    for i, y_pred_train in enumerate(adaboost_classifier.staged_predict(X_train)):
+        train_accuracy = accuracy_score(y_train, y_pred_train)
+        train_accuracies.append(train_accuracy)
+
+        y_pred_test = adaboost_classifier.estimators_[i].predict(X_test)
+        test_accuracy = accuracy_score(y_test, y_pred_test)
+        test_accuracies.append(test_accuracy)
+
+        print(f"Iteration {i + 1}: Training Accuracy = {train_accuracy:.4f}, Test Accuracy = {test_accuracy:.4f}")
+    # 训练模型
+    adaboost_classifier.fit(X_train, y_train)
+
+    # 保存模型
+    with open('boosting.pkl', 'wb') as f:
+        pickle.dump(adaboost_classifier, f)
+
+    # 绘制每次迭代的准确率曲线
+    plt.plot(range(1, n_estimators + 1), train_accuracies, label='Training Accuracy')
+    plt.plot(range(1, n_estimators + 1), test_accuracies, label='Test Accuracy')
+    plt.xlabel('Number of Iterations')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
+
+# 加载模型
+if is_eval:
+    with open('boosting.pkl', 'rb') as f:
+        adaboost_classifier = pickle.load(f)
 
 # 在测试集上进行预测
 y_pred = adaboost_classifier.predict(X_test)
