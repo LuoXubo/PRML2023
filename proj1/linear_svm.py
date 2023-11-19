@@ -13,7 +13,7 @@ from scipy.io import loadmat
 from tqdm import tqdm, trange
 from matplotlib import pyplot as plt
 import _pickle as pickle
-
+from utils import load_data
 
 # 创建SVM模型
 svm_model = LinearSVC()
@@ -21,20 +21,7 @@ print('Init SVM model')
 is_eval = False
 
 # 加载手写数字数据集
-dataset = loadmat('mnist_all.mat')
-
-# 加载测试集和训练集
-X_test = dataset['test0']
-y_test = np.zeros(X_test.shape[0])
-for i in range(1, 10):
-    X_test = np.vstack((X_test, dataset['test' + str(i)]))
-    y_test = np.hstack((y_test, np.full(dataset['test' + str(i)].shape[0], i)))
-
-X_train = dataset['train0']
-y_train = np.zeros(X_train.shape[0])
-for i in range(1, 10):
-    X_train = np.vstack((X_train, dataset['train' + str(i)]))
-    y_train = np.hstack((y_train, np.full(dataset['train' + str(i)].shape[0], i)))
+X_train, y_train, X_test, y_test = load_data('mnist_all.mat')
 
 # 训练模型
 if not is_eval:
