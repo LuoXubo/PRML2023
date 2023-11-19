@@ -11,29 +11,28 @@ from torch.utils.data import DataLoader, TensorDataset
 from torchvision import transforms
 from scipy.io import loadmat
 import numpy as np
+from tqdm import tqdm, trange
+from matplotlib import pyplot as plt
+from utils import load_data
+from sklearn.preprocessing import StandardScaler
 
 # 从.mat文件加载数据
-train_data = loadmat('path/to/train_data.mat')
-test_data = loadmat('path/to/test_data.mat')
-
-# 提取图像和标签
-train_images = train_data['train_images']
-train_labels = train_data['train_labels']
-test_images = test_data['test_images']
-test_labels = test_data['test_labels']
+train_features, train_labels, test_features, test_labels = load_data('mnist_all.mat')
 
 # 数据预处理
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+scaler = StandardScaler()
+train_features = scaler.fit_transform(train_features)
+test_features = scaler.transform(test_features)
 
 # 转换为PyTorch Tensor
-train_images = torch.Tensor(train_images).unsqueeze(1)  # 添加一个维度表示通道数
+train_features = torch.FloatTensor(train_features).unsqueeze(1).reshape(-1,1,28,28)
 train_labels = torch.LongTensor(train_labels)
-test_images = torch.Tensor(test_images).unsqueeze(1)
+test_features = torch.FloatTensor(test_features).unsqueeze(1).reshape(-1,1,28,28)
 test_labels = torch.LongTensor(test_labels)
 
 # 创建数据集和数据加载器
-train_dataset = TensorDataset(train_images, train_labels)
-test_dataset = TensorDataset(test_images, test_labels)
+train_dataset = TensorDataset(train_features, train_labels)
+test_dataset = TensorDataset(test_features, test_labels)
 
 train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
@@ -67,19 +66,37 @@ class SimpleCNN(nn.Module):
 model = SimpleCNN()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
+is_eval = False
 
-# 训练模型
-num_epochs = 5
-for epoch in range(num_epochs):
-    for i, (images, labels) in enumerate(train_loader):
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+if not is_eval:
+    # 训练模型
+    train_losses = []
+    num_epochs = 5
+    for epoch in trange(num_epochs):
+        for i, (images, labels) in enumerate(train_loader):
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
-        if (i+1) % 100 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}')
+            if (i+1) % 100 == 0:
+                print(f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {loss.item():.4f}')
+                train_losses.append(loss.item())
+
+    # 保存模型
+    torch.save(model.state_dict(), 'mnist_cnn_model.pth')
+
+    # 绘制损失函数曲线
+    plt.plot(train_losses, label='Train Loss')
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
+
+if is_eval:
+    # 加载模型
+    model.load_state_dict(torch.load('mnist_cnn_model.pth'))
 
 # 评估模型
 model.eval()
@@ -94,6 +111,3 @@ with torch.no_grad():
 
 accuracy = correct / total
 print(f'Test Accuracy: {accuracy * 100:.2f}%')
-
-# 保存模型
-torch.save(model.state_dict(), 'mnist_cnn_model.pth')
