@@ -14,6 +14,7 @@ from sklearn.metrics import accuracy_score, classification_report
 import pandas as pd
 import numpy as np
 from utils import load_data
+from tqdm import tqdm, trange
 
 # 读取数据, 划分训练集和测试集
 X_train_scaled, X_test_scaled, y_train, y_test = load_data("WA_Fn-UseC_-Telco-Customer-Churn.csv")
@@ -51,7 +52,7 @@ class CNNModel(nn.Module):
     def __init__(self):
         super(CNNModel, self).__init__()
         self.layer_1 = nn.Linear(X_train_scaled.shape[1],64)
-        self.layer_2 = nn.Linear(40,64)
+        self.layer_2 = nn.Linear(X_train_scaled.shape[1],64)
         self.layer_out = nn.Linear(64,1)
         
         self.relu = nn.ReLU()
@@ -71,11 +72,15 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # 训练模型
 num_epochs = 10
-for epoch in range(num_epochs):
+for epoch in trange(num_epochs):
     for inputs, labels in train_loader:
         optimizer.zero_grad()
         outputs = model(inputs)
-        loss = criterion(outputs, labels.view(-1, 1))
+        # print(outputs.shape)
+        # print(labels.view(-1,1,1).shape)
+        print(outputs)
+        print(labels.view(-1, 1, 1))
+        loss = criterion(outputs, labels.view(-1, 1, 1))
         loss.backward()
         optimizer.step()
 

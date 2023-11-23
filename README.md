@@ -3,5 +3,11 @@
 ## Project 1: mnist
 
 - linear SVM
-- kernel_SVM
+- kernel SVM
+- CNN
+
+## Project 2: Churn
+
+- linear SVM
+- kernel SVM
 - CNN
