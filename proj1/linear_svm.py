@@ -19,6 +19,7 @@ from utils import load_data
 svm_model = LinearSVC()
 print('Init SVM model')
 is_eval = False
+is_save = False
 
 # 加载手写数字数据集
 X_train, y_train, X_test, y_test = load_data('mnist_all.mat')
@@ -39,9 +40,11 @@ if not is_eval:
             accuracy_scores = np.append(accuracy_scores, accuracy)
             print(f"Fold {fold} Accuracy: {accuracy * 100:.2f}%")
             pbar.update(1)
+            
+    if is_save:
     # 保存模型
-    with open('svm_model.pkl', 'wb') as f:
-        pickle.dump(svm_model, f)
+        with open('svm_model.pkl', 'wb') as f:
+            pickle.dump(svm_model, f)
     x_axis = np.arange(1, n_split + 1)
     plt.plot(x_axis, accuracy_scores, linewidth=1, label='accuracy')
     plt.xlabel('folds')

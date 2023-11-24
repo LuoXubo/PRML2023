@@ -13,6 +13,7 @@ from scipy.io import loadmat
 from tqdm import tqdm, trange
 from matplotlib import pyplot as plt
 import _pickle as pickle
+from sklearn.decomposition import PCA
 
 def load_data(filename):
     """
@@ -31,3 +32,9 @@ def load_data(filename):
         X_train = np.vstack((X_train, dataset['train' + str(i)]))
         y_train = np.hstack((y_train, np.full(dataset['train' + str(i)].shape[0], i)))
     return X_train, y_train, X_test, y_test
+
+def pca_fit(X_input, n_components):
+    
+    pca = PCA(n_components=n_components)  # 指定降维后的维度
+    X_pca = pca.fit_transform(X_input)
+    return X_pca
