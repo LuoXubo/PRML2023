@@ -15,7 +15,7 @@ X_train, y_train, X_test, y_test = load_data("mnist_all.mat")
 print(X_train.shape)
 # 特征标准化
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X_train)
+X_scaled = scaler.fit_transform(X_test)
 
 # 创建PCA模型
 pca = PCA()
