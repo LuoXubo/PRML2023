@@ -21,16 +21,19 @@ def load_data(filename):
     """
     dataset = loadmat(filename)
     X_test = dataset['test0']
+    
     y_test = np.zeros(X_test.shape[0])
     for i in range(1, 10):
         X_test = np.vstack((X_test, dataset['test' + str(i)]))
         y_test = np.hstack((y_test, np.full(dataset['test' + str(i)].shape[0], i)))
+    X_test = pca_fit(X_test, 50)
 
     X_train = dataset['train0']
     y_train = np.zeros(X_train.shape[0])
     for i in range(1, 10):
         X_train = np.vstack((X_train, dataset['train' + str(i)]))
         y_train = np.hstack((y_train, np.full(dataset['train' + str(i)].shape[0], i)))
+    X_train = pca_fit(X_train, 50)
     return X_train, y_train, X_test, y_test
 
 def pca_fit(X_input, n_components):
