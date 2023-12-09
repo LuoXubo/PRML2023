@@ -11,3 +11,8 @@
 - linear SVM
 - kernel SVM
 - CNN
+
+## Project 3: CIFAR-10
+
+- Logistic regression
+- CNN
