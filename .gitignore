@@ -1,0 +1,14 @@
+# proj1/mnist_all.mat
+# proj1/mnist_cnn_model.pth
+# proj1/svm_classifier.pkl
+# proj1/svm_model.pkl
+# proj2/kernel_svm.pkl
+# proj2/linear_svm.pkl
+# proj3/test_feat.npy
+# proj3/train_feat.npy
+# proj3/resnet18.pth
+
+*.mat
+*.pth
+*.pkl
+*.npy

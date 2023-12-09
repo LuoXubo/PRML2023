@@ -4,6 +4,24 @@
 @Time        :   2023/12/08 09:01:24
 """
 
+import torch
+import torch.nn as nn
+from torch import optim
+import torch.nn.functional as F
+import torch.utils.data as Data
+import torchvision
+import torchvision.transforms as transforms
+
+from matplotlib import pyplot as plt
+from matplotlib import cm
+import matplotlib_inline
+from pylab import mpl
+
+import random
+import numpy as np
+
+device = torch.device ("cuda" if torch.cuda.is_available () else "cpu")
+
 
 class ResBlock (nn.Module) :
   '''

@@ -20,15 +20,23 @@ from pylab import mpl
 import random
 import numpy as np
 
+transform = transforms.Compose ([
+    transforms.ToTensor (),
+    transforms.RandomHorizontalFlip (),
+    transforms.Normalize ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+])
+
+device = torch.device ("cuda" if torch.cuda.is_available () else "cpu")
+
 def DataLoad (batch_size = 64, num_workers = 2) :
   # 数据的读取
   cifar10_train = torchvision.datasets.CIFAR10 (
-    root = '/kaggle/input/cifar10-python', 
+    root = '../../cifar-10-python', 
     train = True, download = False, 
     transform = transform
   )
   cifar10_test = torchvision.datasets.CIFAR10 (
-    root = '/kaggle/input/cifar10-python', 
+    root = '../../cifar-10-python', 
     train = False, download = False, 
     transform = transform
   )
@@ -131,4 +139,5 @@ def Trainer (train_set, test_set, net, epochs, criterion, optimizer) :
     # 打印训练日志
     print('[%d/%d] loss : %.4f, train acc : %.3f, test acc : %.3f'
           % (epoch, epochs, losses[-1], train_acc[-1], test_acc[-1]))
+  torch.save (net.state_dict (), 'resnet18.pth')
   return losses, train_acc, test_acc, cnt
