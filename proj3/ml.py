@@ -30,9 +30,9 @@ def cluster_acc(y_true, y_pred):
     return sum([w[i, j] for i, j in ind]) * 1.0 / y_pred.size
 #
 ## 朴素贝叶斯与KNN分类
-def knn_gnb_lr_lsr(X, labels, title_knn="XXX.KNN",\
-                title_gnb="XXX.GNB",title_lr="XXX.LR",\
-                title_lsr="XXX=LSR",n = 3):
+def knn_gnb_lr_lsr(X, labels, title_knn="CIFAR.KNN",\
+                title_gnb="CIFAR.GNB",title_lr="CIFAR.LR",\
+                title_lsr="CIFAR.LSR",n = 3):
     # 划分训练集和测试集
     x_train, x_test, labels_train, labels_test =\
         train_test_split(X, labels, test_size=0.2, random_state=22)
@@ -74,6 +74,7 @@ def knn_gnb_lr_lsr(X, labels, title_knn="XXX.KNN",\
     label_sample = log_reg.predict(x_test)
     lsr_acc = cluster_acc(labels_test, label_sample)
     print(title_lsr, "=", lsr_acc)
+    print('\n')
 
     return round(knn_acc,n),round(gnb_acc,n),round(lr_acc,n),round(lsr_acc,n)
 

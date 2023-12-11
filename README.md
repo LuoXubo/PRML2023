@@ -14,5 +14,8 @@
 
 ## Project 3: CIFAR-10
 
+- KNN
+- Gaussian NB
+- Linear regression
 - Logistic regression
 - CNN
