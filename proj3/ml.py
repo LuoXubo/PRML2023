@@ -27,7 +27,7 @@ X,Y,Z = get_imgdata(file,sfile,re_size,n_test)
 X = X.reshape(n_test*10000, -1)
 X_ = []
 Y_ = []
-for i in range(n):
+for i in range(n_test):
     X_.append(X[i*10000:(i+1)*10000])
     Y_.append(Y[i*10000:(i+1)*10000])
 X_ = np.array(X_)
@@ -37,7 +37,7 @@ knn_acc = []
 gnb_acc = []
 lr_acc = []
 lsr_acc = []
-for i in range(n):
+for i in range(n_test):
     t1,t2,t3,t4= \
         knn_gnb_lr_lsr(X_[i], Y_[i])
     knn_acc.append(t1)
@@ -46,7 +46,7 @@ for i in range(n):
     lsr_acc.append(t4)
 # 使用pandas输出
 title1 = []
-for i in range(n):
+for i in range(n_test):
     t = 'data_bath'+str(i+1)
     title1.append(t)
 title2 = ["KNN     ", "Naive Bayes","linear regression","Logistic regression"]

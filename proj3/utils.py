@@ -12,6 +12,16 @@ import torch.utils.data as Data
 import torchvision
 import torchvision.transforms as transforms
 
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from scipy.optimize import linear_sum_assignment
+
 from matplotlib import pyplot as plt
 from matplotlib import cm
 import matplotlib_inline
@@ -19,6 +29,7 @@ from pylab import mpl
 
 import random
 import numpy as np
+import pandas as pd
 
 transform = transforms.Compose ([
     transforms.ToTensor (),
