@@ -39,6 +39,7 @@ allLabels = ['airplane', 'automobile', 'bird', 'cat', 'deer',
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser ()
     parser.add_argument('--eval', type = int, default = 0, help = 'evaluate the model')
+    parser.add_argument('--path', type = str, default = '../../cifar-10-python', help = 'path of cifar-10-python')
     parser.add_argument('--batch_size', type = int, default = 64, help = 'batch size for training')
     parser.add_argument('--epochs', type = int, default = 50, help = 'number of epochs for training')
     parser.add_argument('--lr', type = float, default = 0.0002, help = 'learning rate for training')
@@ -50,15 +51,17 @@ if __name__ == '__main__' :
     epochs = args.epochs
     lr = args.lr
     model_path = args.model_path
+    path = args.path
 
     ''' 读取 CIFAR-10 数据集 '''
-    train_set, test_set = DataLoad (batch_size)
+    train_set, test_set = DataLoad (batch_size=batch_size, num_workers=2, path=path)
     print (len (train_set), len (test_set))
     print (next (iter (train_set))[0].shape)
+    
 
     ''' 残差网络 18 模型的构建 '''
     net18 = ResNet18 (ResBlock).to (device)
-    print (net18)
+    # print (net18)
 
     if not is_eval :
         ''' 训练模型 '''

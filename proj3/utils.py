@@ -39,18 +39,19 @@ transform = transforms.Compose ([
 
 device = torch.device ("cuda" if torch.cuda.is_available () else "cpu")
 
-def DataLoad (batch_size = 64, num_workers = 2) :
+def DataLoad (batch_size = 64, num_workers = 2, path = '../../cifar-10-python') :
   # 数据的读取
   cifar10_train = torchvision.datasets.CIFAR10 (
-    root = '../../cifar-10-python', 
+    root = path, 
     train = True, download = False, 
     transform = transform
   )
   cifar10_test = torchvision.datasets.CIFAR10 (
-    root = '../../cifar-10-python', 
+    root = path, 
     train = False, download = False, 
     transform = transform
   )
+  print(cifar10_test.data.shape)
 
   # 数据打包成批次
   train_set = Data.DataLoader (
@@ -109,7 +110,6 @@ def DrawBarChart (categories, cnt, figsize = (5, 5)) :
   plt.show ()
   
 ''' 评估函数, 用于计算模型在测试集上的准确率 '''
-
 def Evaluate (net, Dataset) :
   acc_ratio, n = 0.0, 0
   ncnt = [0] * 10
@@ -127,7 +127,6 @@ def Evaluate (net, Dataset) :
   return acc_ratio, ncnt
 
 ''' 训练过程的实现 '''
-
 def Trainer (train_set, test_set, net, epochs, criterion, optimizer) :
   losses, train_acc, test_acc = [], [], []
   cnt = [0] * 10
@@ -206,7 +205,8 @@ def knn_gnb_lr_lsr(X, labels, title_knn="CIFAR.KNN",\
     # 划分训练集和测试集
     x_train, x_test, labels_train, labels_test =\
         train_test_split(X, labels, test_size=0.2, random_state=22)
-
+    print(x_train.shape)
+    print(labels_train.shape)
     # 使用KNN进行分类
     knn = KNeighborsClassifier()
     knn.fit(x_train, labels_train)
