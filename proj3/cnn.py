@@ -17,9 +17,12 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 import matplotlib_inline
 from pylab import mpl
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 import random
 import numpy as np
+import argparse
 
 from utils import *
 from resnet import ResNet18, ResBlock
@@ -30,31 +33,45 @@ is_eval = False
 
 
 device = torch.device ("cuda" if torch.cuda.is_available () else "cpu")
+allLabels = ['airplane', 'automobile', 'bird', 'cat', 'deer', 
+                    'dog', 'frog', 'horse', 'ship', 'truck']
 
-''' 读取 CIFAR-10 数据集 '''
-batch_size = 64
-train_set, test_set = DataLoad (batch_size)
-print (len (train_set), len (test_set))
-print (next (iter (train_set))[0].shape)
+if __name__ == '__main__' :
+    parser = argparse.ArgumentParser ()
+    parser.add_argument('--eval', type = int, default = 0, help = 'evaluate the model')
+    parser.add_argument('--batch_size', type = int, default = 64, help = 'batch size for training')
+    parser.add_argument('--epochs', type = int, default = 50, help = 'number of epochs for training')
+    parser.add_argument('--lr', type = float, default = 0.0002, help = 'learning rate for training')
+    parser.add_argument('--model_path', type = str, default = './resnet18.pth', help = 'path for saving trained models')
 
-''' 残差网络 18 模型的构建 '''
-net18 = ResNet18 (ResBlock).to (device)
-print (net18)
+    args = parser.parse_args ()
+    is_eval = args.eval
+    batch_size = args.batch_size
+    epochs = args.epochs
+    lr = args.lr
+    model_path = args.model_path
 
-if not is_eval :
-    ''' 训练模型 '''
-    allLabels = ['airplane', 'automobile', 'bird', 'cat', 'deer', 
-                'dog', 'frog', 'horse', 'ship', 'truck']
-    epochs = 50
-    optimizer = optim.Adam (net18.parameters (), lr = 0.0002)
-    criterion = nn.CrossEntropyLoss ()
-    losses, train_acc, test_acc, cnt = Trainer (train_set, test_set, net18, epochs, criterion, optimizer)
-    DrawDoubleLineChart (losses, train_acc, test_acc)
-    DrawBarChart (allLabels, cnt)
+    ''' 读取 CIFAR-10 数据集 '''
+    train_set, test_set = DataLoad (batch_size)
+    print (len (train_set), len (test_set))
+    print (next (iter (train_set))[0].shape)
 
-else:
+    ''' 残差网络 18 模型的构建 '''
+    net18 = ResNet18 (ResBlock).to (device)
+    print (net18)
+
+    if not is_eval :
+        ''' 训练模型 '''
+        # epochs = 50
+        optimizer = optim.Adam (net18.parameters (), lr = lr)
+        criterion = nn.CrossEntropyLoss ()
+        losses, train_acc, test_acc, cnt = Trainer (train_set, test_set, net18, epochs, criterion, optimizer)
+        DrawDoubleLineChart (losses, train_acc, test_acc)
+        DrawBarChart (allLabels, cnt)
+
+    
     ''' 加载已经训练好的模型 '''
-    net18.load_state_dict (torch.load ('./net18.pth'))
+    net18.load_state_dict (torch.load (model_path))
     net18.eval ()
 
     ''' 测试模型 '''
@@ -96,4 +113,10 @@ else:
             _, predicted = torch.max (outputs, 1)
             for i in range (4) :
                 confusion_matrix[labels[i]][predicted[i]] += 1
-    DrawConfusionMatrix (confusion_matrix, allLabels)
+    sns.set ()
+    f, ax = plt.subplots ()
+    sns.heatmap (confusion_matrix, annot = True, ax = ax)
+    ax.set_title ('confusion matrix')
+    ax.set_xlabel ('predict')
+    ax.set_ylabel ('true')
+    # DrawConfusionMatrix (confusion_matrix, allLabels)
