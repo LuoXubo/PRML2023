@@ -22,9 +22,10 @@ import argparse
  
  
 class Classifier(object):
-    def __init__(self, filePath, classifier='linear_svm'):
+    def __init__(self, filePath, classifier='linear_svm', is_save=False):
         self.filePath = filePath
         self.type = classifier
+        self.is_save = is_save
         if classifier == 'linear_svm':
             self.classifier = LinearSVC()
         elif classifier == 'kernel_svm':
@@ -135,8 +136,9 @@ class Classifier(object):
         print("Time cost: %f\n" % (tok - tik))
 
         # 保存模型
-        with open('caches/%s.pkl'%self.type, 'wb') as f:
-            pickle.dump(self.classifier, f)
+        if self.is_save:
+            with open('caches/%s.pkl'%self.type, 'wb') as f:
+                pickle.dump(self.classifier, f)
         
         predict_result = self.classifier.predict(test_feat[:, :-1])
         num = 0
@@ -171,11 +173,13 @@ if __name__ == '__main__':
     # parser.add_argument('--train', type = bool, default = True, help = 'Train the model (True - train and test, False - only test)')
     parser.add_argument('--file_path', type = str, default = '../../cifar-10-python/cifar-10-batches-py', help = 'path of cifar-10-python')
     parser.add_argument('--classifier', type = str, default = 'linear_svm', help = 'classifiers (linear_svm, kernel_svm, gaussian_nb)')
+    parser.add_argument('--is_save', type = bool, default = False, help = 'save the model')
 
     args = parser.parse_args()
     filePath = args.file_path
     classifer = args.classifier
+    is_save = args.is_save
     # is_train = args.train
 
-    cf = Classifier(filePath, classifier=classifer)
+    cf = Classifier(filePath, classifier=classifer, is_save=is_save)
     cf.run()
