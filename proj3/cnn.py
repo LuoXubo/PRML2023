@@ -68,7 +68,7 @@ if __name__ == '__main__' :
         # epochs = 50
         optimizer = optim.Adam (net18.parameters (), lr = lr)
         criterion = nn.CrossEntropyLoss ()
-        losses, train_acc, test_acc, cnt = Trainer (train_set, test_set, net18, epochs, criterion, optimizer)
+        losses, train_acc, test_acc, cnt = Trainer (train_set, test_set, net18, epochs, criterion, optimizer, model_path=model_path)
         DrawDoubleLineChart (losses, train_acc, test_acc)
         DrawBarChart (allLabels, cnt)
 

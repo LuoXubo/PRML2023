@@ -127,7 +127,7 @@ def Evaluate (net, Dataset) :
   return acc_ratio, ncnt
 
 ''' 训练过程的实现 '''
-def Trainer (train_set, test_set, net, epochs, criterion, optimizer) :
+def Trainer (train_set, test_set, net, epochs, criterion, optimizer, model_path) :
   losses, train_acc, test_acc = [], [], []
   cnt = [0] * 10
   for epoch in range (1, epochs + 1) :
@@ -149,6 +149,7 @@ def Trainer (train_set, test_set, net, epochs, criterion, optimizer) :
     # 打印训练日志
     print('[%d/%d] loss : %.4f, train acc : %.3f, test acc : %.3f'
           % (epoch, epochs, losses[-1], train_acc[-1], test_acc[-1]))
+
   torch.save (net.state_dict (), 'resnet18.pth')
   return losses, train_acc, test_acc, cnt
 

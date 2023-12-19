@@ -2,6 +2,7 @@ from __future__ import print_function
 import numpy as np
 from random import shuffle
 from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
 from .softmax import *
 
 def svm_loss_naive(W, X, y, reg):
@@ -116,9 +117,29 @@ class KernelSVMClassifier(object):
     self.W = None
     self.svm = SVC(kernel='rbf', C=1, gamma='scale')
 
+  def fit(self, X, y, num_iters=100, batch_size=200, verbose=False):
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
+    num_train, dim = X_train.shape
+    loss_history = []
+    for it in range(num_iters):
+      X_batch = None
+      y_batch = None
+
+      idxs = np.random.choice(num_train, batch_size)
+      X_batch = X[idxs, :]
+      y_batch = y_train[idxs]
+
+      # evaluate loss and gradient
+      self.svm.fit(X_batch, y_batch)
+      y_pred = self.svm.predict(X_val)
+      loss = np.sum(y_pred != y_val)
+      loss_history.append(loss)
+
+      if verbose and it % 100 == 0:
+        print('iteration %d / %d: loss %f' % (it, num_iters, loss))
+
   def train(self, X, y, X_test, y_test, learning_rate=1e-3, reg=1e-5, num_iters=100,
             batch_size=200, verbose=False):
-    
     num_train, dim = X.shape
     loss_history = []
     for it in range(num_iters):
@@ -132,7 +153,7 @@ class KernelSVMClassifier(object):
       # evaluate loss and gradient
       self.svm.fit(X_batch, y_batch)
       y_pred = self.svm.predict(X_test)
-      loss = np.mean(y_pred != y_test)
+      loss = np.sum(y_pred != y_test)
     #   loss, grad = self.loss(X_batch, y_batch, reg)
       loss_history.append(loss)
 
