@@ -14,9 +14,6 @@ from skimage.feature import hog
 from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
 import _pickle as pickle
 import argparse
  
