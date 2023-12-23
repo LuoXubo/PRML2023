@@ -10,6 +10,7 @@ import math
 import time
 import numpy as np
 import tqdm
+from data_utils import load_CIFAR10
 from skimage.feature import hog
 from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
@@ -19,10 +20,11 @@ import argparse
  
  
 class Classifier(object):
-    def __init__(self, filePath, classifier='linear_svm', is_save=False):
+    def __init__(self, filePath, classifier='linear_svm', is_hog=False, is_save=False):
         self.filePath = filePath
         self.type = classifier
         self.is_save = is_save
+        self.is_hog = is_hog
         if classifier == 'linear_svm':
             self.classifier = LinearSVC()
         elif classifier == 'kernel_svm':
@@ -35,7 +37,13 @@ class Classifier(object):
         with open(file, 'rb') as fo:
             dict = pickle.load(fo, encoding='bytes')
         return dict
- 
+    
+    def load_CIFAR(self):
+        X_train, y_train, X_test, y_test = load_CIFAR10(self.filePath)
+        X_train = np.reshape(X_train, (X_train.shape[0], -1))
+        X_test = np.reshape(X_test, (X_test.shape[0], -1))
+        return X_train, y_train, X_test, y_test
+    
     def get_data(self):
         TrainData = []
         TestData = []
@@ -102,13 +110,12 @@ class Classifier(object):
         for data in tqdm.tqdm(TestData):
             image = np.reshape(data[0].T, (32, 32, 3))
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)/255.
-            fd = self.get_hog_feat(gray) #你可以用我写的hog提取函数，也可以用下面skimage提供的，我的速度会慢一些
-            # fd = hog(gray) #你可以用我写的hog提取函数，也可以用下面skimage提供的，我的速度会慢一些
+            fd = self.get_hog_feat(gray)
             # fd = hog(gray, 9, [8, 8], [2, 2])
             fd = np.concatenate((fd, data[1]))
             test_feat.append(fd)
         test_feat = np.array(test_feat)
-        np.save("test_feat.npy", test_feat)
+        np.save("caches/test_feat.npy", test_feat)
         print("Test features are extracted and saved.")
         for data in tqdm.tqdm(TrainData):
             image = np.reshape(data[0].T, (32, 32, 3))
@@ -118,13 +125,12 @@ class Classifier(object):
             fd = np.concatenate((fd, data[1]))
             train_feat.append(fd)
         train_feat = np.array(train_feat)
-        np.save("train_feat.npy", train_feat)
+        np.save("caches/train_feat.npy", train_feat)
         print("Train features are extracted and saved.")
         return train_feat, test_feat
  
     def classification(self, train_feat, test_feat):
-        t0 = time.time()
-        
+        # 训练模型
         print("\nTraining the %s classifier."%self.type)
         tik = time.time()
         self.classifier.fit(train_feat[:, :-1], train_feat[:, -1])
@@ -134,18 +140,20 @@ class Classifier(object):
 
         # 保存模型
         if self.is_save:
-            with open('caches/%s.pkl'%self.type, 'wb') as f:
+            with open('caches/%s_hog.pkl'%self.type, 'wb') as f:
                 pickle.dump(self.classifier, f)
         
+        # 测试模型
         predict_result = self.classifier.predict(test_feat[:, :-1])
-        num = 0
-        for i in range(len(predict_result)):
-            if int(predict_result[i]) == int(test_feat[i, -1]):
-                num += 1
-        rate = float(num) / len(predict_result)
-        t1 = time.time()
-        print('The testing classification accuracy is %f' % rate)
-        print('The testing time cost is :%f' % (t1 - t0))
+        acc = np.mean(predict_result == test_feat[:, -1])
+        # num = 0
+        # for i in range(len(predict_result)):
+        #     if int(predict_result[i]) == int(test_feat[i, -1]):
+        #         num += 1
+        # rate = float(num) / len(predict_result)
+        # t1 = time.time()
+        print('The testing classification accuracy is %f' % acc)
+        # print('The testing time cost is :%f' % (t1 - t0))
  
         # predict_result2 = clf.predict(train_feat[:, :-1])
         # num2 = 0
@@ -154,29 +162,57 @@ class Classifier(object):
         #         num2 += 1
         # rate2 = float(num2) / len(predict_result2)
         # print('The Training classification accuracy is %f' % rate2)
- 
+    
+    
     def run(self):
-        if os.path.exists("train_feat.npy") and os.path.exists("test_feat.npy"):
-            train_feat = np.load("train_feat.npy")
-            test_feat = np.load("test_feat.npy")
+        if not self.is_hog:
+            """
+            不使用hog特征的情况，因为逻辑比较简单，所以没有写单独的处理函数
+            """
+            # 读取数据
+            X_train, y_train, X_test, y_test = self.load_CIFAR()
+            # 训练
+            print('Beign to train the %s classifier ...'%self.type)
+            tik = time.time()
+            self.classifier.fit(X_train, y_train)
+            tok = time.time()
+            print("Training finished. Time cost: %f\n" % (tok - tik))
+            # 保存模型
+            if self.is_save:
+                with open('caches/%s.pkl'%self.type, 'wb') as f:
+                    pickle.dump(self.classifier, f)
+            # 测试
+            print('Beign to test the %s classifier ...'%self.type)
+            predict_result = self.classifier.predict(X_test)
+            acc = np.mean(predict_result == y_test)
+            print('The testing classification accuracy is %f' % acc)
         else:
-            TrainData, TestData = self.get_data()
-            train_feat, test_feat = self.get_feat(TrainData, TestData)
-        self.classification(train_feat, test_feat)
- 
+            """
+            使用hog特征的情况
+            """
+            # 加载caches中已经提取好的hog特征
+            if os.path.exists("caches/train_feat.npy") and os.path.exists("caches/test_feat.npy"):
+                train_feat = np.load("train_feat.npy")
+                test_feat = np.load("test_feat.npy")
+            # 或者重新提取hog特征
+            else:
+                TrainData, TestData = self.get_data()
+                train_feat, test_feat = self.get_feat(TrainData, TestData)
+            # 训练和测试
+            self.classification(train_feat, test_feat)
  
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--train', type = bool, default = True, help = 'Train the model (True - train and test, False - only test)')
     parser.add_argument('--file_path', type = str, default = '../../cifar-10-python/cifar-10-batches-py', help = 'path of cifar-10-python')
     parser.add_argument('--classifier', type = str, default = 'linear_svm', help = 'classifiers (linear_svm, kernel_svm, gaussian_nb)')
-    parser.add_argument('--is_save', type = bool, default = False, help = 'save the model')
+    parser.add_argument('--hog', type = int, default = 1, help = 'use hog (1) or not (0)')
+    parser.add_argument('--is_save', type = int, default = 1, help = 'save the model (1) or not (0)')
 
     args = parser.parse_args()
     filePath = args.file_path
     classifer = args.classifier
-    is_save = args.is_save
-    # is_train = args.train
+    is_hog = (args.hog == 1)
+    is_save = (args.is_save == 1)
 
-    cf = Classifier(filePath, classifier=classifer, is_save=is_save)
+    cf = Classifier(filePath, classifier=classifer, is_hog = is_hog, is_save=is_save)
     cf.run()
