@@ -192,8 +192,8 @@ class Classifier(object):
             """
             # 加载caches中已经提取好的hog特征
             if os.path.exists("caches/train_feat.npy") and os.path.exists("caches/test_feat.npy"):
-                train_feat = np.load("caches/train_feat.npy")
-                test_feat = np.load("caches/test_feat.npy")
+                train_feat = np.load("train_feat.npy")
+                test_feat = np.load("test_feat.npy")
             # 或者重新提取hog特征
             else:
                 TrainData, TestData = self.get_data()

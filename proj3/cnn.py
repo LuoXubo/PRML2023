@@ -106,7 +106,7 @@ if __name__ == '__main__' :
     for i in range (10) :
         print ('Accuracy of %5s : %2d %%' % (allLabels[i], 100 * class_correct[i] / class_total[i]))
 
-    # ''' 混淆矩阵 '''
+    ''' 混淆矩阵 '''
     # confusion_matrix = np.zeros ((10, 10))
     # with torch.no_grad () :
     #     for data in test_set :
