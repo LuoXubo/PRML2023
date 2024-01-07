@@ -24,8 +24,8 @@ import random
 import numpy as np
 import argparse
 
-from utils import *
-from resnet import ResNet18, ResBlock
+from utils.utils import *
+from models.resnet import ResNet18, ResBlock
 
 mpl.rcParams['font.sans-serif'] = ['Microsoft YaHei']
 mpl.rcParams['axes.unicode_minus'] = False
@@ -43,7 +43,7 @@ if __name__ == '__main__' :
     parser.add_argument('--batch_size', type = int, default = 64, help = 'batch size for training')
     parser.add_argument('--epochs', type = int, default = 50, help = 'number of epochs for training')
     parser.add_argument('--lr', type = float, default = 0.0002, help = 'learning rate for training')
-    parser.add_argument('--model_path', type = str, default = './resnet18.pth', help = 'path for saving trained models')
+    parser.add_argument('--model_path', type = str, default = './caches/resnet18.pth', help = 'path for saving trained models')
 
     args = parser.parse_args ()
     is_eval = args.eval
@@ -106,20 +106,20 @@ if __name__ == '__main__' :
     for i in range (10) :
         print ('Accuracy of %5s : %2d %%' % (allLabels[i], 100 * class_correct[i] / class_total[i]))
 
-    ''' 混淆矩阵 '''
-    confusion_matrix = np.zeros ((10, 10))
-    with torch.no_grad () :
-        for data in test_set :
-            images, labels = data
-            images, labels = images.to (device), labels.to (device)
-            outputs = net18 (images)
-            _, predicted = torch.max (outputs, 1)
-            for i in range (4) :
-                confusion_matrix[labels[i]][predicted[i]] += 1
-    sns.set ()
-    f, ax = plt.subplots ()
-    sns.heatmap (confusion_matrix, annot = True, ax = ax)
-    ax.set_title ('confusion matrix')
-    ax.set_xlabel ('predict')
-    ax.set_ylabel ('true')
+    # ''' 混淆矩阵 '''
+    # confusion_matrix = np.zeros ((10, 10))
+    # with torch.no_grad () :
+    #     for data in test_set :
+    #         images, labels = data
+    #         images, labels = images.to (device), labels.to (device)
+    #         outputs = net18 (images)
+    #         _, predicted = torch.max (outputs, 1)
+    #         for i in range (4) :
+    #             confusion_matrix[labels[i]][predicted[i]] += 1
+    # sns.set ()
+    # f, ax = plt.subplots ()
+    # sns.heatmap (confusion_matrix, annot = True, ax = ax)
+    # ax.set_title ('confusion matrix')
+    # ax.set_xlabel ('predict')
+    # ax.set_ylabel ('true')
     # DrawConfusionMatrix (confusion_matrix, allLabels)
