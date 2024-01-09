@@ -1,6 +1,6 @@
 # CIFAR-10 图像分类数据集
 
-## 支持方法
+## 支持算法
 
 ### Linear SVM
 
@@ -19,7 +19,9 @@
 
 ### ResNet
 
-- Original backbone
-- 3x3 convolutions
-- Better BN scale init
-- Residual branches
+- Original backbone: 56.36%
+- 3x3 convolutions: 86.06%
+- Better output: 90.67%
+- Shortcut: 94.30%
+
+## 使用方法

@@ -69,7 +69,7 @@ def DAWN_net(c=64, block=res_block, prep_bn_relu=False, concat_pool=True, **kw):
 def conv_bn(c_in, c_out, bn_weight_init=1.0, **kw):
     return {
         'conv': nn.Conv2d(c_in, c_out, kernel_size=3, stride=1, padding=1, bias=False), 
-        'bn': batch_norm(c_out, bn_weight_init=bn_weight_init, **kw), 
+        'bn': batch_norm(c_out, **kw), 
         'relu': nn.ReLU(True)
     }
 
